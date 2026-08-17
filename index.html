@@ -425,15 +425,37 @@
 
 <a class="floating-wa" href="https://wa.me/905527556355?text=Merhaba%20Murat%20Tekstil%20Promosyon%2C%20teklif%20almak%20istiyorum." target="_blank" rel="noopener" aria-label="WhatsApp">WA</a>
 <script>
-const menu=document.querySelector('.menu'), nav=document.querySelector('nav');
-menu.addEventListener('click',()=>nav.classList.toggle('open'));
-nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
-const filters=document.querySelectorAll('.filter'), products=document.querySelectorAll('.product');
-filters.forEach(btn=>btn.addEventListener('click',()=>{
-  filters.forEach(x=>x.classList.remove('active')); btn.classList.add('active');
-  const f=btn.dataset.filter;
-  products.forEach(p=>p.style.display=(f==='all'||p.dataset.cat===f)?'block':'none');
-}));
+const menu = document.querySelector('.menu');
+const nav = document.querySelector('nav');
+
+if (menu && nav) {
+  menu.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => nav.classList.remove('open'));
+  });
+}
+
+const filters = document.querySelectorAll('.filter');
+const products = document.querySelectorAll('.product');
+
+filters.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filters.forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+
+    const f = btn.dataset.filter;
+
+    products.forEach(product => {
+      const kategori = product.dataset.cat;
+
+      if (f === 'all' || kategori === f) {
+        product.style.display = 'block';
+      } else {
+        product.style.display = 'none';
+      }
+    });
+  });
+});
 </script>
 </body>
 </html>
