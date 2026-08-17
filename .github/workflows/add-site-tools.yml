@@ -1,0 +1,39 @@
+name: Add site tools
+
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update index
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          if 'id="mt-tools"' in s:
+              raise SystemExit(0)
+          html='''<div id="mt-tools" style="display:flex;align-items:center;gap:10px;font-size:13px;margin-left:auto;white-space:nowrap"><select id="mt-lang" style="padding:5px;border-radius:6px"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option><option value="ar">🇸🇦 العربية</option></select><span>🕐 <b id="mt-time">--:--:--</b></span><span>📅 <b id="mt-date">--/--/----</b></span></div>'''
+          css='''<style>#mt-tools{color:inherit}#mt-tools select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3)}@media(max-width:900px){#mt-tools{font-size:11px;gap:5px}#mt-date{display:none}}</style>'''
+          js='''<script>(function(){const l=document.getElementById("mt-lang"),t=document.getElementById("mt-time"),d=document.getElementById("mt-date");if(!l)return;try{l.value=localStorage.getItem("mt-lang")||"tr"}catch(e){}l.onchange=()=>{try{localStorage.setItem("mt-lang",l.value)}catch(e){}};function tick(){const n=new Date();t.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(n);d.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"}).format(n)}tick();setInterval(tick,1000)})()</script>'''
+          s=s.replace('</head>',css+'</head>',1)
+          s=s.replace('<div class="toplinks">','<div class="toplinks">',1)
+          s=s.replace('</div></div></div>\n<header','</div>'+html+'</div></div></div>\n<header',1)
+          if 'id="mt-tools"' not in s:
+              s=s.replace('<header class="header">',html+'<header class="header">',1)
+          s=s.replace('</body>',js+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add language selector, Turkey time and date"
+          git push
