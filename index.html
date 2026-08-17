@@ -443,10 +443,10 @@ filters.forEach(btn => {
     filters.forEach(x => x.classList.remove('active'));
     btn.classList.add('active');
 
-    const f = btn.dataset.filter;
+    const f = btn.getAttribute('data-filter')
 
     products.forEach(product => {
-      const kategori = product.dataset.cat;
+     const kategori = product.getAttribute('data-cat');
 
       if (f === 'all' || kategori === f) {
         product.style.display = 'block';
