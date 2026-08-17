@@ -1,0 +1,66 @@
+name: Fix language switching v2
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-language:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add working language switcher
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-LANGUAGE-V2 -->'
+          if marker in s:
+              raise SystemExit(0)
+          script=r'''<!-- MT-LANGUAGE-V2 -->
+<script>
+(function(){
+  const select=document.getElementById('mt-lang');
+  if(!select)return;
+  const T={
+    tr:{nav:['Ürünler','Özel Üretim','Neden Biz?','İletişim','Teklif Al'],filters:['Tümü','Mont','Polar','Reflektörlü','Polo & Tişört','Sweatshirt','Pantolon','Şapka'],hero:'İşinize yakışan|iş kıyafetleri.',desc:'İşletmelere yönelik iş kıyafetleri ve kurumsal tekstil ürünlerinde; model, renk, kumaş, reflektör, logo ve beden ihtiyaçlarınıza göre üretim çözümleri sunuyoruz.',review:'Ürünleri İncele',wa:"WhatsApp'tan Yaz"},
+    en:{nav:['Products','Custom Production','Why Us?','Contact','Get a Quote'],filters:['All','Jackets','Fleece','Reflective','Polo & T-Shirt','Sweatshirt','Work Pants','Caps'],hero:'Workwear that|fits your business.',desc:'We provide workwear and corporate textile solutions tailored to your model, color, fabric, reflective, logo and size requirements.',review:'View Products',wa:'Message on WhatsApp'},
+    ar:{nav:['المنتجات','إنتاج خاص','لماذا نحن؟','اتصل بنا','اطلب عرضاً'],filters:['الكل','سترات','فليس','عاكس','بولو وتيشيرت','سويت شيرت','بنطلون عمل','قبعات'],hero:'ملابس عمل|تليق بعملك.',desc:'نقدم حلول ملابس العمل والمنسوجات للشركات وفق الموديل واللون والقماش والعاكس والشعار والمقاسات التي تحتاجها.',review:'عرض المنتجات',wa:'تواصل عبر واتساب'}
+  };
+  function apply(lang){
+    const x=T[lang]||T.tr;
+    document.documentElement.lang=lang;
+    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    const nav=document.querySelectorAll('header nav a');
+    nav.forEach((e,i)=>{if(x.nav[i])e.textContent=x.nav[i]});
+    document.querySelectorAll('.filter').forEach((e,i)=>{if(x.filters[i])e.textContent=x.filters[i]});
+    const h=document.querySelector('.hero-copy h1');
+    if(h){const a=x.hero.split('|');h.innerHTML=a[0]+'<br><em>'+a[1]+'</em>'}
+    const p=document.querySelector('.hero-copy p');if(p)p.textContent=x.desc;
+    const b=document.querySelector('.hero-actions .primary');if(b)b.textContent=x.review;
+    const w=document.querySelector('.hero-actions .whatsapp');if(w)w.textContent=x.wa;
+    document.querySelectorAll('.product-link').forEach(e=>e.textContent=lang==='en'?'Request quote →':lang==='ar'?'اطلب عرضاً →':'Teklif iste →');
+    try{localStorage.setItem('mt-lang',lang)}catch(e){}
+  }
+  let current='tr';try{current=localStorage.getItem('mt-lang')||'tr'}catch(e){}
+  select.value=current;apply(current);
+  select.addEventListener('change',function(){apply(this.value)});
+})();
+</script>'''
+          if '</body>' not in s:
+              raise SystemExit('body tag missing')
+          s=s.replace('</body>',script+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit site fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Fix language selector switching"
+          git push
