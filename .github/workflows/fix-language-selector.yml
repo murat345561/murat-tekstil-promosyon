@@ -1,0 +1,62 @@
+name: Fix language selector
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-language-selector.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace language script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''<script>(function(){const l=document.getElementById("mt-lang"),t=document.getElementById("mt-time"),d=document.getElementById("mt-date");if(!l)return;try{l.value=localStorage.getItem("mt-lang")||"tr"}catch(e){}l.onchange=()=>{try{localStorage.setItem("mt-lang",l.value)}catch(e){}};function tick(){const n=new Date();t.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(n);d.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"}).format(n)}tick();setInterval(tick,1000)})()</script>'''
+          new = '''<script>
+(function(){
+  const l=document.getElementById('mt-lang'), t=document.getElementById('mt-time'), d=document.getElementById('mt-date');
+  if(!l) return;
+  const translations={
+    tr:{nav:['Ürünler','Özel Üretim','Neden Biz?','İletişim','Teklif Al'],filters:['Tümü','Mont','Polar','Reflektörlü','Polo & Tişört','Sweatshirt','Pantolon','Şapka'],heroTitle:'İşinize yakışan|iş kıyafetleri.',heroText:'İşletmelere yönelik iş kıyafetleri ve kurumsal tekstil ürünlerinde; model, renk, kumaş, reflektör, logo ve beden ihtiyaçlarınıza göre üretim çözümleri sunuyoruz.',review:'Ürünleri İncele',wa:'WhatsApp\'tan Yaz'},
+    en:{nav:['Products','Custom Production','Why Us?','Contact','Get a Quote'],filters:['All','Jackets','Fleece','Reflective','Polo & T-Shirt','Sweatshirt','Work Pants','Caps'],heroTitle:'Workwear that|fits your business.',heroText:'We provide workwear and corporate textile solutions tailored to your model, color, fabric, reflective, logo and size requirements.',review:'View Products',wa:'Message on WhatsApp'},
+    ar:{nav:['المنتجات','إنتاج خاص','لماذا نحن؟','اتصل بنا','اطلب عرضاً'],filters:['الكل','سترات','فليس','عاكس','بولو وتيشيرت','سويت شيرت','بنطلون عمل','قبعات'],heroTitle:'ملابس عمل|تليق بعملك.',heroText:'نقدم حلول ملابس العمل والمنسوجات للشركات وفق الموديل واللون والقماش والعاكس والشعار والمقاسات التي تحتاجها.',review:'عرض المنتجات',wa:'تواصل عبر واتساب'}
+  };
+  function apply(lang){
+    const x=translations[lang]||translations.tr;
+    document.documentElement.lang=lang;
+    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    document.querySelectorAll('nav a').forEach((e,i)=>{if(x.nav[i])e.textContent=x.nav[i]});
+    document.querySelectorAll('.filter').forEach((e,i)=>{if(x.filters[i])e.textContent=x.filters[i]});
+    const h=document.querySelector('.hero-copy h1');
+    if(h){const a=x.heroTitle.split('|');h.innerHTML=a[0]+'<br><em>'+a[1]+'</em>'}
+    const hp=document.querySelector('.hero-copy p');if(hp)hp.textContent=x.heroText;
+    const rb=document.querySelector('.hero-actions .primary');if(rb)rb.textContent=x.review;
+    const wb=document.querySelector('.hero-actions .whatsapp');if(wb)wb.textContent=x.wa;
+    try{localStorage.setItem('mt-lang',lang)}catch(e){}
+  }
+  let saved='tr';try{saved=localStorage.getItem('mt-lang')||'tr'}catch(e){}
+  l.value=saved;apply(saved);
+  l.addEventListener('change',function(){apply(this.value)});
+  function tick(){const n=new Date();t.textContent=new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n);d.textContent=new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',year:'numeric'}).format(n)}
+  tick();setInterval(tick,1000);
+})();
+</script>'''
+          if old not in s:
+              raise SystemExit('old script not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Make language selector change site text"
+          git push
