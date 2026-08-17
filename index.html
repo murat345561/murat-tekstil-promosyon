@@ -443,17 +443,17 @@ filters.forEach(btn => {
     filters.forEach(x => x.classList.remove('active'));
     btn.classList.add('active');
 
-    const f = btn.getAttribute('data-filter')
+    const f = btn.getAttribute('data-filter');
 
-    products.forEach(product => {
-     const kategori = product.getAttribute('data-cat');
-
-      if (f === 'all' || kategori === f) {
-        product.style.display = 'block';
-      } else {
+products.forEach(product => {
+    if (f === 'all') {
+        product.style.display = '';
+    } else if (product.getAttribute('data-cat') === f) {
+        product.style.display = '';
+    } else {
         product.style.display = 'none';
-      }
-    });
+    }
+});
   });
 });
 </script>
