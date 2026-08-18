@@ -1,0 +1,107 @@
+name: Site tools
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  update-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add counter music and language switcher
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-SITE-TOOLS-V2 -->'
+          if marker in s:
+              raise SystemExit(0)
+          block=r'''<!-- MT-SITE-TOOLS-V2 -->
+          <style>
+          #mt-site-tools{position:fixed;right:18px;bottom:86px;z-index:9999;display:flex;gap:7px;align-items:center;font:600 12px Arial,sans-serif}
+          #mt-site-tools button{border:0;border-radius:22px;padding:10px 13px;background:#0a2342;color:#fff;cursor:pointer;box-shadow:0 5px 18px rgba(0,0,0,.16)}
+          #mt-site-tools button:hover{transform:translateY(-1px)}
+          #mt-counter{background:#fff!important;color:#0a2342!important;border:1px solid #d9e0e8!important}
+          html[dir="rtl"] body{direction:rtl} html[dir="rtl"] .topbar-inner,html[dir="rtl"] .nav-wrap{direction:rtl}
+          @media(max-width:700px){#mt-site-tools{right:10px;bottom:76px;flex-wrap:wrap;justify-content:flex-end}#mt-site-tools button{padding:8px 10px}}
+          </style>
+          <div id="mt-site-tools" aria-label="Site araçları">
+            <button id="mt-music" type="button">🎵 Müziği Aç</button>
+            <button id="mt-counter" type="button">👥 Ziyaretçi: <span id="mt-visits">...</span></button>
+          </div>
+          <script>
+          (function(){
+            'use strict';
+            const translations={
+              en:{
+                'TOPTAN & ÖZEL ÜRETİM':'WHOLESALE & CUSTOM PRODUCTION','Ürünler':'Products','Özel Üretim':'Custom Production','Neden Biz?':'Why Us?','İletişim':'Contact','Teklif Al':'Get a Quote',
+                'Ürünleri İncele':'View Products',"WhatsApp'tan Yaz":'Message on WhatsApp','ÜRÜN GRUPLARI':'PRODUCT GROUPS','İhtiyacınız olan modeli bulun.':'Find the model you need.','Tümü':'All','Mont':'Jackets','Polar':'Fleece','Reflektörlü':'Reflective','Polo & Tişört':'Polo & T-Shirt','Sweatshirt':'Sweatshirt','Pantolon':'Trousers','Şapka':'Caps','Yelek':'Vests','Teklif iste →':'Request a Quote →','ÖZEL ÜRETİM':'CUSTOM PRODUCTION','TOPLU SİPARİŞ':'BULK ORDERS','LOGO UYGULAMA':'LOGO APPLICATION','PLANLI TESLİMAT':'PLANNED DELIVERY','İşinize yakışan':'Workwear that fits','iş kıyafetleri.':'your business.','Müziği Aç':'Turn Music On','Müziği Kapat':'Turn Music Off'
+              },
+              ar:{
+                'TOPTAN & ÖZEL ÜRETİM':'البيع بالجملة والإنتاج الخاص','Ürünler':'المنتجات','Özel Üretim':'إنتاج خاص','Neden Biz?':'لماذا نحن؟','İletişim':'اتصل بنا','Teklif Al':'اطلب عرض سعر',
+                'Ürünleri İncele':'تصفح المنتجات',"WhatsApp'tan Yaz":'راسلنا عبر واتساب','ÜRÜN GRUPLARI':'مجموعات المنتجات','İhtiyacınız olan modeli bulun.':'اعثر على الموديل الذي تحتاجه.','Tümü':'الكل','Mont':'جاكيت','Polar':'فليس','Reflektörlü':'عاكس','Polo & Tişört':'بولو وتيشيرت','Sweatshirt':'سويت شيرت','Pantolon':'بنطلون','Şapka':'قبعات','Yelek':'سترات','Teklif iste →':'اطلب عرض سعر →','ÖZEL ÜRETİM':'إنتاج خاص','TOPLU SİPARİŞ':'طلبات بالجملة','LOGO UYGULAMA':'تطبيق الشعار','PLANLI TESLİMAT':'تسليم مخطط','Müziği Aç':'تشغيل الموسيقى','Müziği Kapat':'إيقاف الموسيقى'
+              },
+              tr:{}
+            };
+            const original=new Map();
+            function textNodes(root){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const a=[];while(w.nextNode())a.push(w.currentNode);return a;}
+            function translate(lang){
+              const map=translations[lang]||{};
+              textNodes(document.body).forEach(n=>{
+                if(n.parentElement && (n.parentElement.id==='mt-site-tools')) return;
+                const raw=n.nodeValue.trim(); if(!raw)return;
+                if(!original.has(n)) original.set(n,raw);
+                const base=original.get(n);
+                if(lang==='tr') n.nodeValue=n.nodeValue.replace(raw,base);
+                else if(map[base]) n.nodeValue=n.nodeValue.replace(raw,map[base]);
+              });
+              document.documentElement.lang=lang;
+              document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+              localStorage.setItem('mt-lang',lang);
+            }
+            const sel=document.getElementById('mt-lang');
+            const saved=localStorage.getItem('mt-lang')||'tr';
+            if(sel){sel.value=saved;sel.addEventListener('change',()=>translate(sel.value));}
+            translate(saved);
+
+            let audio=null, timer=null, step=0;
+            const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];
+            function music(on){
+              if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+              if(audio.state==='suspended') audio.resume();
+              if(!on){clearInterval(timer);return;}
+              clearInterval(timer); step=0;
+              const play=()=>{const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=notes[step%notes.length];g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.045,audio.currentTime+.03);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.45);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.48);step++;};
+              play(); timer=setInterval(play,560);
+            }
+            const mb=document.getElementById('mt-music');
+            if(mb) mb.addEventListener('click',()=>{const on=mb.dataset.on!=='1';mb.dataset.on=on?'1':'0';music(on);const lang=sel?sel.value:'tr';mb.textContent=on?'🔇 '+(lang==='en'?'Turn Music Off':lang==='ar'?'إيقاف الموسيقى':'Müziği Kapat'):'🎵 '+(lang==='en'?'Turn Music On':lang==='ar'?'تشغيل الموسيقى':'Müziği Aç');});
+
+            const visit=document.getElementById('mt-visits');
+            if(visit){
+              const key='mt-visitor-counted';
+              if(!localStorage.getItem(key)){
+                fetch('https://api.counterapi.dev/v1/murattekstilpromosyon/visits/up').then(r=>r.json()).then(d=>{visit.textContent=(d.count||d.value||0).toLocaleString('tr-TR');localStorage.setItem(key,'1');}).catch(()=>{visit.textContent='—';});
+              }else{
+                fetch('https://api.counterapi.dev/v1/murattekstilpromosyon/visits').then(r=>r.json()).then(d=>{visit.textContent=(d.count||d.value||0).toLocaleString('tr-TR');}).catch(()=>{visit.textContent='—';});
+              }
+            }
+          })();
+          </script>'''
+          block=block.replace('          ','')
+          s=s.replace('</body>',block+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add visitor counter music and language switcher"
+          git push
