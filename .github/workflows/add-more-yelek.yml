@@ -1,49 +1,33 @@
 name: Add more yelek products
-
 on:
   push:
-
 permissions:
   contents: write
-
 jobs:
   add:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add seven yelek products
+      - name: Add products
         run: |
           python - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='<!-- MT-MORE-YELEK-PRODUCTS -->'
-          if marker in s:
-              raise SystemExit(0)
-          products=[
-            ('GABARDİN YELEK.png','Gabardin Yelek','Dayanıklı gabardin kumaşıyla iş ortamları için kullanışlı ve rahat yelek.'),
-            ('HARİTACI YELEK.png','Haritacı Yelek','Saha çalışmaları için fonksiyonel cep detaylarına sahip iş yeleği.'),
-            ('İÇİ POLAR YELEK.jpg','İçi Polar Yelek','İçi polar yapısıyla sıcak tutan, rahat ve kullanışlı iş yeleği.'),
-            ('Jacks YELEK.jpeg','Jacks Yelek','Şık görünümü ve rahat yapısıyla kurumsal kullanım için uygun yelek.'),
-            ('MÜHENDİS.webp','Mühendis Yeleği','Saha ve teknik ekipler için kullanışlı, fonksiyonel iş yeleği.'),
-            ('POLAR YELEK.jpg','Polar Yelek','Sıcak tutan polar yapısıyla iş ve dış ortam kullanımı için uygundur.'),
-            ('PUF YELEK.jpg','Puf Yelek','Hafif ve sıcak tutan yapısıyla soğuk çalışma ortamları için uygun yelek.')
-          ]
-          cards=[marker]
-          for img,title,desc in products:
-              cards.append(f'<article class="product" data-cat="yelek"><div class="product-img"><img src="{img}" alt="{title}"></div><div class="product-body"><span>İŞ YELEĞİ</span><h3>{title}</h3><p>{desc}</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>')
-          block='\n'.join(cards)+'\n'
-          anchor='<!-- MT-YELEK-PRODUCTS -->'
-          pos=s.find(anchor)
-          if pos==-1:
-              raise SystemExit('Yelek ürün bölümü bulunamadı')
-          s=s[:pos]+block+s[pos:]
-          p.write_text(s,encoding='utf-8')
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-MORE-YELEK-16 -->'
+          if marker not in s:
+              items=[('elek 1.webp','İş Yeleği'),('isci-yelegi-702x1024.jpeg','İşçi Yeleği'),('is-yelekleri.jpeg','İş Yelekleri'),('isyeri-yelegi.jpeg','İşyeri Yeleği'),('OIP (2).webp','İş Yeleği'),('OIP (3).webp','İş Yeleği'),('OIP (4) - Kopya.webp','İş Yeleği'),('teknik-personel-yelegi.jpeg','Teknik Personel Yeleği'),('yeelek (2).webp','İş Yeleği'),('yeelek.webp','İş Yeleği'),('yelek (2).webp','Yelek Modeli'),('yelek -.webp','İş Yeleği'),('yelek x.webp','İş Yeleği'),('yelek...webp','İş Yeleği'),('yelek.webp','İş Yeleği'),('yelekv.webp','İş Yeleği')]
+              cards=[marker]
+              for img,title in items:
+                  cards.append(f'<article class="product" data-cat="yelek"><div class="product-img"><img src="{img}" alt="{title}"></div><div class="product-body"><span>İŞ YELEĞİ</span><h3>{title}</h3><p>Kurumsal kullanım için iş yeleği.</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>')
+              anchor='<!-- MT-YELEK-PRODUCTS -->'; pos=s.find(anchor)
+              if pos<0: raise SystemExit('Yelek ürünleri bulunamadı')
+              s=s[:pos]+'\n'.join(cards)+'\n'+s[pos:]
+              p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "Add 7 more yelek products"
+          git diff --cached --quiet || git commit -m "Add 16 more yelek products"
           git push
