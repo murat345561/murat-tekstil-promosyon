@@ -1,0 +1,59 @@
+name: Fix new yelek image paths
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Match yelek image names exactly
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          fixes = {
+            'GABARDIN YELEK.png':'GABARDİN YELEK.png',
+            'GABARDİN YELEK.jpg':'GABARDİN YELEK.png',
+            'gabardin-yelek.png':'GABARDİN YELEK.png',
+            'gabardin yelek.png':'GABARDİN YELEK.png',
+            'HARITACI YELEK.png':'HARİTACI YELEK.png',
+            'HARİTACI YELEK.jpg':'HARİTACI YELEK.png',
+            'haritaci-yelek.png':'HARİTACI YELEK.png',
+            'haritacı-yelek.png':'HARİTACI YELEK.png',
+            'İCI POLAR YELEK.jpg':'İÇİ POLAR YELEK.jpg',
+            'ICI POLAR YELEK.jpg':'İÇİ POLAR YELEK.jpg',
+            'ici-polar-yelek.jpg':'İÇİ POLAR YELEK.jpg',
+            'içi-polar-yelek.jpg':'İÇİ POLAR YELEK.jpg',
+            'JACKS YELEK.jpeg':'Jacks YELEK.jpeg',
+            'jacks-yelek.jpeg':'Jacks YELEK.jpeg',
+            'jacks yelek.jpeg':'Jacks YELEK.jpeg',
+            'MUHENDIS.webp':'MÜHENDİS.webp',
+            'MÜHENDİS YELEK.webp':'MÜHENDİS.webp',
+            'muhendis.webp':'MÜHENDİS.webp',
+            'muhendis-yelek.webp':'MÜHENDİS.webp',
+            'POLAR YELEK.webp':'POLAR YELEK.jpg',
+            'polar-yelek.jpg':'POLAR YELEK.jpg',
+            'polar yelek.jpg':'POLAR YELEK.jpg',
+            'PUF YELEK.webp':'PUF YELEK.jpg',
+            'puf-yelek.jpg':'PUF YELEK.jpg',
+            'puf yelek.jpg':'PUF YELEK.jpg'
+          }
+          for old,new in fixes.items():
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Fix new yelek image paths"
+          git push
