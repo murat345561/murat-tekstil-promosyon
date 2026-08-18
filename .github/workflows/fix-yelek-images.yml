@@ -1,0 +1,39 @@
+name: Fix broken yelek images
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Correct yelek image filenames
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          fixes={
+            '3 gabardin kapitoneli yelek.webp':'3 gabardin kapitoneli  yelek.webp',
+            '4 softşel yelek.jpg':'4 softşel  yelek.jpg',
+            '8 softşel yelek.jpg':'8 softşel  yelek.jpg',
+            '9 cok ceplı köküklü kapitoneli yelek.webp':'9 cok ceplı köküklü kapitoneli  yelek.webp',
+            '10 cok ceplı kapitoneli yelek.jpg':'10  cok ceplı  kapitoneli  yelek.jpg'
+          }
+          for old,new in fixes.items():
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Fix yelek image paths"
+          git push
