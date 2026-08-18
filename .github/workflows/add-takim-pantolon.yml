@@ -1,0 +1,38 @@
+name: Add takim pantolon product
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  add-product:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add takım product to Pantolon
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-TAKIM-PANTOLON -->'
+          if marker not in s:
+              product='''<!-- MT-TAKIM-PANTOLON -->\n<article class="product" data-cat="pantolon"><div class="product-img"><img src="takım.jpg" alt="İş Kıyafeti Takımı"></div><div class="product-body"><span>İŞ PANTOLONU</span><h3>İş Kıyafeti Takımı</h3><p>Dayanıklı iş kıyafeti takımı; kurumsal kullanım ve toplu siparişler için üretilebilir.</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>\n'''
+              anchor='<article class="product" data-cat="pantolon">'
+              pos=s.find(anchor)
+              if pos==-1:
+                  raise SystemExit('Pantolon ürünleri bulunamadı')
+              s=s[:pos]+product+s[pos:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add takım.jpg pantolon product"
+          git push
