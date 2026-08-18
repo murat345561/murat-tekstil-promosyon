@@ -1,0 +1,37 @@
+name: Add gabardin mont products
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add two mont products
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-GABARDIN-MONT -->'
+          if marker not in s:
+              product='''<!-- MT-GABARDIN-MONT -->\n<article class="product" data-cat="mont"><div class="product-img"><img src="gabardin.webp" alt="Gabardin Mont"></div><div class="product-body"><span>İŞ MONTU</span><h3>Gabardin Mont</h3><p>Dayanıklı gabardin kumaştan iş montu; kurumsal ve saha kullanımı için uygundur.</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>\n<article class="product" data-cat="mont"><div class="product-img"><img src="gabarrdin.png" alt="Gabardin Mont"></div><div class="product-body"><span>İŞ MONTU</span><h3>Gabardin İş Montu</h3><p>Gabardin kumaş yapısıyla dayanıklı ve kullanışlı iş montu.</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>\n'''
+              anchor='<article class="product" data-cat="mont">'
+              pos=s.find(anchor)
+              if pos==-1: raise SystemExit('Mont ürünleri bulunamadı')
+              s=s[:pos]+product+s[pos:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add gabardin mont products"
+          git push
