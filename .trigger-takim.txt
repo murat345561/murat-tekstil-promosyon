@@ -1,0 +1,1 @@
+Takım ürünü ekleme işlemini tetikle.
