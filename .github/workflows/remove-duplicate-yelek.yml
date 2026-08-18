@@ -1,0 +1,36 @@
+name: Remove duplicate yelek products
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove duplicate seven yeleks
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          start='<!-- MT-MORE-YELEK-PRODUCTS -->'
+          end='<!-- MT-YELEK-PRODUCTS -->'
+          if start in s and end in s:
+              a=s.index(start)
+              b=s.index(end,a)
+              s=s[:a]+s[b:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Remove duplicate yelek products"
+          git push
