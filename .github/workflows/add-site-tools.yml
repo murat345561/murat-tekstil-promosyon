@@ -17,17 +17,41 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          if 'id="mt-tools"' in s:
-              raise SystemExit(0)
-          html='''<div id="mt-tools" style="display:flex;align-items:center;gap:10px;font-size:13px;margin-left:auto;white-space:nowrap"><select id="mt-lang" style="padding:5px;border-radius:6px"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option><option value="ar">🇸🇦 العربية</option></select><span>🕐 <b id="mt-time">--:--:--</b></span><span>📅 <b id="mt-date">--/--/----</b></span></div>'''
-          css='''<style>#mt-tools{color:inherit}#mt-tools select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3)}@media(max-width:900px){#mt-tools{font-size:11px;gap:5px}#mt-date{display:none}}</style>'''
-          js='''<script>(function(){const l=document.getElementById("mt-lang"),t=document.getElementById("mt-time"),d=document.getElementById("mt-date");if(!l)return;try{l.value=localStorage.getItem("mt-lang")||"tr"}catch(e){}l.onchange=()=>{try{localStorage.setItem("mt-lang",l.value)}catch(e){}};function tick(){const n=new Date();t.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(n);d.textContent=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"}).format(n)}tick();setInterval(tick,1000)})()</script>'''
-          s=s.replace('</head>',css+'</head>',1)
-          s=s.replace('<div class="toplinks">','<div class="toplinks">',1)
-          s=s.replace('</div></div></div>\n<header','</div>'+html+'</div></div></div>\n<header',1)
-          if 'id="mt-tools"' not in s:
-              s=s.replace('<header class="header">',html+'<header class="header">',1)
-          s=s.replace('</body>',js+'</body>',1)
+
+          # Add Yelek filter once.
+          if 'data-filter="yelek"' not in s:
+              marker='<button class="filter" data-filter="sapka">Şapka</button>'
+              if marker in s:
+                  s=s.replace(marker, marker+'<button class="filter" data-filter="yelek">Yelek</button>',1)
+
+          # Add the 11 yelek products once.
+          marker='<!-- MT-YELEK-PRODUCTS -->'
+          if marker not in s:
+              products=[
+                ('01-sisme-yelek.jpg','Şişme Yelek','Sıcak tutan yapısı ve rahat kullanımıyla iş ortamları için uygun şişme yelek.'),
+                ('2 şık yelek.jpg','Şık İş Yeleği','Şık görünümü ve rahat kesimiyle kurumsal kullanım için uygun iş yeleği.'),
+                ('3 gabardin kapitoneli yelek.webp','Gabardin Kapitoneli Yelek','Gabardin kumaş ve kapitone yapısıyla dayanıklı ve kullanışlı iş yeleği.'),
+                ('4 softşel yelek.jpg','Softshell Yelek','Rahat ve dayanıklı softshell kumaşıyla saha ve dış ortam kullanımı için uygundur.'),
+                ('5 micro elfaflı şişme yelek.webp','Micro Elyaflı Şişme Yelek','Micro elyaf dolgulu yapısıyla sıcak tutan, hafif ve rahat iş yeleği.'),
+                ('6 CİFT TARAFLI POLAR YELEK.jpg','Çift Taraflı Polar Yelek','İki farklı kullanım seçeneği sunan sıcak tutan çift taraflı polar yelek.'),
+                ('7 çifttaraflı yelek.png','Çift Taraflı Yelek','Pratik kullanımı ve çift taraflı tasarımıyla farklı çalışma ortamlarına uygundur.'),
+                ('8 softşel yelek.jpg','Softshell Yelek','Dayanıklı softshell kumaşı ve rahat yapısıyla iş kullanımı için tasarlanmıştır.'),
+                ('9 cok ceplı köküklü kapitoneli yelek.webp','Çok Cepli Kapitoneli Yelek','Çok cepli ve kapitoneli tasarımıyla saha çalışanları için fonksiyonel yelek.'),
+                ('10 cok ceplı kapitoneli yelek.jpg','Çok Cepli Kapitoneli Yelek','Fonksiyonel cep detayları ve kapitone yapısıyla kullanışlı iş yeleği.'),
+                ('11 İŞ-YELEKLERİ.jpg','İş Yelekleri','Farklı sektör ve çalışma koşullarına uygun kurumsal iş yeleği seçenekleri.')
+              ]
+              cards=['<!-- MT-YELEK-PRODUCTS -->']
+              for img,title,desc in products:
+                  cards.append(f'<article class="product" data-cat="yelek"><div class="product-img"><img src="{img}" alt="{title}"></div><div class="product-body"><span>İŞ YELEĞİ</span><h3>{title}</h3><p>{desc}</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>')
+              block='\n'.join(cards)
+              pos=s.find('<section id="ozel-uretim"')
+              if pos==-1: pos=s.find('<section id="neden"')
+              if pos==-1: raise SystemExit('Ürünler bölümünün sonu bulunamadı')
+              end=s.rfind('</div></div></section>',0,pos)
+              if end==-1: raise SystemExit('Ürün grid kapanışı bulunamadı')
+              s=s[:end]+block+s[end:]
+
+          # Keep the existing language/time tools unchanged; this workflow only adds products.
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
@@ -35,5 +59,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "Add language selector, Turkey time and date"
+          git diff --cached --quiet || git commit -m "Add yelek category and 11 yelek products"
           git push
