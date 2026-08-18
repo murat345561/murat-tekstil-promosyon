@@ -1,0 +1,49 @@
+name: Add 5 new polar products
+
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  add-polar-products:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add polar products
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-5-POLAR-NEW -->'
+          if marker in s:
+              raise SystemExit(0)
+          products=[
+            ('fermuarlı swet.png','Fermuarlı Sweat','Fermuarlı yapısıyla rahat, kullanışlı ve iş ortamlarına uygun polar/sweat modelidir.'),
+            ('polar mont.png','Polar Mont','Sıcak tutan polar yapısı ve rahat kesimiyle iş ve günlük kullanım için uygundur.'),
+            ('polar robalı.jpg','Robalı Polar','Robalı tasarımıyla rahat ve dayanıklı, kurumsal kullanım için uygun polar modelidir.'),
+            ('polar..png','Polar Model','Sıcak tutan ve rahat yapısıyla farklı çalışma ortamları için uygun polar modelidir.'),
+            ('polar.webp','Polar','Hafif, sıcak tutan ve rahat yapısıyla iş ortamlarında kullanıma uygun polar modelidir.')
+          ]
+          cards=[marker]
+          for img,title,desc in products:
+              cards.append(f'<article class="product" data-cat="polar"><div class="product-img"><img src="{img}" alt="{title}"></div><div class="product-body"><span>POLAR</span><h3>{title}</h3><p>{desc}</p><a href="#iletisim" class="product-link">Teklif iste →</a></div></article>')
+          block='\n'.join(cards)+'\n'
+          anchor='<article class="product" data-cat="polar">'
+          pos=s.find(anchor)
+          if pos==-1:
+              raise SystemExit('Polar ürünleri bulunamadı')
+          s=s[:pos]+block+s[pos:]
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit website update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add 5 polar products"
+          git push
