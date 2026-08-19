@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+<rect width="900" height="520" fill="#fff"/>
+<path d="M70 360 C210 455 365 470 530 395 C665 334 775 220 830 70" fill="none" stroke="#650006" stroke-width="72"/>
+<path d="M80 115 C165 150 250 205 315 270" fill="none" stroke="#650006" stroke-width="72"/>
+<path d="M355 350 L455 70 L565 350 Z" fill="#2f8bd4"/>
+<text x="392" y="295" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="800" fill="#fff">A.H.M</text>
+<text x="470" y="420" text-anchor="middle" transform="rotate(-22 470 420)" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="800" fill="#fff">MURAT TEKSTİL PROMOSYON</text>
+</svg>
