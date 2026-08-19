@@ -1,25 +1,28 @@
-/* Modern Murat Tekstil homepage */
-.header{height:92px;background:rgba(255,255,255,.98);position:sticky;top:0;z-index:100;box-shadow:0 10px 32px rgba(6,24,47,.10)}
-.nav-wrap{height:100%}
-.brand{min-width:300px!important;height:78px!important;display:flex!important;align-items:center!important}
-.brand:before{width:290px!important;height:74px!important;background:url('logo.svg') center/contain no-repeat!important;content:"";display:block}
-.hero{min-height:610px;padding:72px 0 70px;background:radial-gradient(circle at 78% 22%,rgba(69,164,235,.25),transparent 28%),radial-gradient(circle at 94% 88%,rgba(213,38,47,.16),transparent 25%),linear-gradient(135deg,#06182f 0%,#0a315a 56%,#0e4e7d 100%)}
-.hero:before{width:560px;height:560px;right:-170px;top:-190px;border:1px solid rgba(255,255,255,.12)}
-.hero-grid{grid-template-columns:1.03fr .97fr;gap:70px;align-items:center}
+/* Modern Murat Tekstil homepage - v2 */
+.header{height:96px;background:#fff;position:sticky;top:0;z-index:100;box-shadow:0 8px 28px rgba(6,24,47,.12)}
+.nav-wrap{height:100%;display:flex;align-items:center;justify-content:space-between}
+.brand{width:300px!important;min-width:300px!important;height:86px!important;display:block!important;position:relative!important;overflow:visible!important}
+.brand:before{content:""!important;display:block!important;position:absolute!important;left:0!important;top:5px!important;width:300px!important;height:76px!important;background-image:url('logo.svg')!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;transform:none!important}
+.brand .brand-mark,.brand .brand-text{display:none!important}
+.hero{min-height:620px;padding:70px 0 64px;background:radial-gradient(circle at 82% 18%,rgba(78,173,239,.28),transparent 29%),radial-gradient(circle at 96% 90%,rgba(213,38,47,.18),transparent 24%),linear-gradient(135deg,#04162d 0%,#0a315a 55%,#105783 100%);position:relative;overflow:hidden}
+.hero:before{width:620px;height:620px;right:-210px;top:-230px;border:1px solid rgba(255,255,255,.13)}
+.hero:after{width:330px;height:330px;right:120px;bottom:-245px;border:1px solid rgba(255,255,255,.09)}
+.hero-grid{grid-template-columns:1fr 1fr;gap:58px;align-items:center}
 .hero-copy{position:relative;z-index:2}
-.hero .eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.06);letter-spacing:2px}
-.hero h1{font-size:68px;line-height:.98;margin:20px 0 24px;letter-spacing:-3px;max-width:700px}
-.hero h1 em{color:#57b6ff}
-.hero-copy>p{font-size:17px;max-width:590px;color:#dce9f5;line-height:1.8}
-.hero-actions{margin-top:30px}
-.hero-points span{padding:8px 11px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
-.hero-showcase{grid-template-columns:1.55fr .75fr;gap:15px;filter:drop-shadow(0 24px 45px rgba(0,0,0,.25))}
-.showcase-main{height:455px;border-radius:24px;border:1px solid rgba(255,255,255,.24);background:#fff}
-.showcase-main img{object-fit:cover}
-.showcase-label{left:18px;right:18px;bottom:18px;border-radius:16px;padding:17px;background:linear-gradient(135deg,rgba(5,23,43,.95),rgba(8,46,78,.88))}
-.showcase-label b{font-size:17px}.showcase-label span{font-size:12px}
-.showcase-mini{gap:15px}.showcase-mini img{height:220px;border-radius:20px;border:1px solid rgba(255,255,255,.24)}
+.hero .eyebrow{display:inline-block;padding:9px 14px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);letter-spacing:2px}
+.hero h1{font-size:64px;line-height:1.02;margin:18px 0 22px;letter-spacing:-2.5px;max-width:680px}
+.hero h1 em{font-style:normal;color:#55b5ff}
+.hero-copy>p{font-size:16px;max-width:600px;color:#d9e8f5;line-height:1.75}
+.hero-actions{display:flex;gap:12px;margin-top:28px}
+.hero-points{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+.hero-points span{padding:8px 11px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
+.hero-showcase{grid-template-columns:1.45fr .72fr;gap:14px;filter:drop-shadow(0 24px 45px rgba(0,0,0,.28))}
+.showcase-main{height:450px;border-radius:24px;overflow:hidden;border:2px solid rgba(255,255,255,.22);background:#fff;position:relative}
+.showcase-main img{width:100%;height:100%;object-fit:cover;display:block}
+.showcase-label{left:18px;right:18px;bottom:18px;border-radius:15px;padding:16px;background:rgba(4,20,38,.92)}
+.showcase-label b{font-size:17px}.showcase-label span{font-size:12px;color:#c7d6e5;margin-top:5px}
+.showcase-mini{display:grid;gap:14px}.showcase-mini img{height:218px;width:100%;object-fit:cover;border-radius:20px;border:2px solid rgba(255,255,255,.22);background:#fff;display:block}
 .trust{box-shadow:0 -1px 0 rgba(255,255,255,.08)}
-@media(max-width:980px){.brand{min-width:250px!important}.brand:before{width:240px!important}.hero{min-height:auto}.hero h1{font-size:56px}.hero-grid{gap:40px}}
-@media(max-width:760px){.header{height:78px}.brand{min-width:205px!important;height:65px!important}.brand:before{width:200px!important;height:62px!important}.hero{padding:48px 0 52px}.hero h1{font-size:46px;letter-spacing:-2px}.hero-showcase{grid-template-columns:1fr}.showcase-main{height:360px}.showcase-mini{grid-template-columns:1fr 1fr}.showcase-mini img{height:170px}}
-@media(max-width:500px){.brand{min-width:165px!important}.brand:before{width:160px!important;height:55px!important}.hero h1{font-size:39px}.hero-copy>p{font-size:15px}.showcase-main{height:320px}.showcase-mini img{height:145px}}
+@media(max-width:980px){.brand{width:250px!important;min-width:250px!important}.brand:before{width:250px!important}.hero{min-height:auto}.hero h1{font-size:54px}.hero-grid{gap:38px}}
+@media(max-width:760px){.header{height:78px}.brand{width:210px!important;min-width:210px!important;height:70px!important}.brand:before{width:210px!important;height:64px!important;top:3px!important}.hero{padding:48px 0 52px}.hero-grid{grid-template-columns:1fr}.hero h1{font-size:46px;letter-spacing:-2px}.hero-showcase{grid-template-columns:1fr}.showcase-main{height:350px}.showcase-mini{grid-template-columns:1fr 1fr}.showcase-mini img{height:170px}}
+@media(max-width:500px){.brand{width:175px!important;min-width:175px!important;height:62px!important}.brand:before{width:175px!important;height:58px!important}.hero h1{font-size:39px}.hero-copy>p{font-size:15px}.hero-actions{flex-direction:column}.hero-actions .btn{text-align:center}.showcase-main{height:315px}.showcase-mini img{height:145px}}
