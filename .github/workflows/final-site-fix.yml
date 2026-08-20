@@ -1,0 +1,50 @@
+name: Final site fixes
+on:
+  push:
+    paths-ignore:
+      - 'index.html'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add image viewer and mobile behavior
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- MT-IMAGE-VIEWER -->'
+          if marker not in s:
+              script=r'''<!-- MT-IMAGE-VIEWER -->
+          <div class="mt-lightbox" id="mtLightbox" aria-hidden="true"><button type="button" id="mtLightboxClose" aria-label="Kapat">×</button><img id="mtLightboxImg" src="" alt="Ürün görseli"></div>
+          <script>
+          (function(){
+            const box=document.getElementById('mtLightbox'), big=document.getElementById('mtLightboxImg'), close=document.getElementById('mtLightboxClose');
+            function openImg(img){ if(!img||!img.src)return; big.src=img.currentSrc||img.src; big.alt=img.alt||'Ürün görseli'; box.classList.add('open'); box.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+            function closeImg(){box.classList.remove('open');box.setAttribute('aria-hidden','true');big.removeAttribute('src');document.body.style.overflow='';}
+            document.querySelectorAll('.product-img img,.showcase-main img,.showcase-mini img').forEach(function(img){img.addEventListener('click',function(){openImg(img);});});
+            close.addEventListener('click',closeImg); box.addEventListener('click',function(e){if(e.target===box)closeImg();}); document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImg();});
+          })();
+          </script>'''
+              s=s.replace('</body>',script+'\n</body>')
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Point logo to full logo asset
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('modern-home.css')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("url('logo.svg')", "url('logo-site.svg')")
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html modern-home.css
+          git diff --cached --quiet || git commit -m "Fix product image viewer and full logo"
+          git push
