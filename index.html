@@ -214,5 +214,16 @@ html[dir="rtl"] body{direction:rtl} html[dir="rtl"] .topbar-inner,html[dir="rtl"
   }
 })();
 </script>
+<!-- MT-IMAGE-VIEWER -->
+<div class="mt-lightbox" id="mtLightbox" aria-hidden="true"><button type="button" id="mtLightboxClose" aria-label="Kapat">×</button><img id="mtLightboxImg" src="" alt="Ürün görseli"></div>
+<script>
+(function(){
+  const box=document.getElementById('mtLightbox'), big=document.getElementById('mtLightboxImg'), close=document.getElementById('mtLightboxClose');
+  function openImg(img){ if(!img||!img.src)return; big.src=img.currentSrc||img.src; big.alt=img.alt||'Ürün görseli'; box.classList.add('open'); box.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function closeImg(){box.classList.remove('open');box.setAttribute('aria-hidden','true');big.removeAttribute('src');document.body.style.overflow='';}
+  document.querySelectorAll('.product-img img,.showcase-main img,.showcase-mini img').forEach(function(img){img.addEventListener('click',function(){openImg(img);});});
+  close.addEventListener('click',closeImg); box.addEventListener('click',function(e){if(e.target===box)closeImg();}); document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImg();});
+})();
+</script>
 </body>
 </html>
